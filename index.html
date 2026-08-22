@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Talk Night</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fff2e0;
+            --card-bg: #fffaf3;
+            --card-hover: #fff0d9;
+            --primary: #ff6f9c;
+            --primary-hover: #ff4f86;
+            --accent: #ffd93d;
+            --accent-soft: #fff3b0;
+            --danger: #ff8a8a;
+            --text-main: #5a3d4d;
+            --text-sub: #a98da0;
+            --border-color: rgba(255, 111, 156, 0.18);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body { 
+            font-family: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif; 
+            background:
+                radial-gradient(circle at 15% 20%, rgba(255,217,61,0.35) 0%, transparent 40%),
+                radial-gradient(circle at 85% 15%, rgba(255,111,156,0.3) 0%, transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(255,217,61,0.25) 0%, transparent 50%),
+                var(--bg-color);
+            color: var(--text-main); 
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* --- Sparkle / star decorations --- */
+        .sparkle-field {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .sparkle {
+            position: absolute;
+            font-size: var(--sp-size, 18px);
+            opacity: 0;
+            animation: twinkle var(--sp-dur, 3.5s) ease-in-out var(--sp-delay, 0s) infinite;
+            filter: drop-shadow(0 0 4px rgba(255,217,61,0.6));
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; transform: scale(0.6) rotate(0deg); }
+            50%      { opacity: 1; transform: scale(1.1) rotate(15deg); }
+        }
+
+        /* --- Personal brand mark --- */
+        .brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .brand-logo {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 6px;
+            filter: drop-shadow(0 4px 8px rgba(255, 111, 156, 0.35));
+            animation: brand-bob 3s ease-in-out infinite;
+        }
+        @keyframes brand-bob {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50%      { transform: translateY(-4px) rotate(2deg); }
+        }
+        .brand-name {
+            font-family: "Fredoka", sans-serif;
+            font-weight: 600;
+            font-size: 1.3rem;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .sparkle svg {
+            width: var(--sp-size, 26px);
+            height: var(--sp-size, 26px);
+            display: block;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 640px;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 28px;
+            padding: 35px 25px;
+            box-shadow: 0 20px 45px rgba(255, 111, 156, 0.22), 0 4px 10px rgba(0,0,0,0.04);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Titles */
+        h1 { font-family: "Fredoka", "Nunito", sans-serif; font-size: 28px; color: var(--primary); margin-bottom: 8px; font-weight: 600; }
+        .subtitle { font-size: 14px; color: var(--text-sub); margin-bottom: 25px; line-height: 1.5; }
+
+        /* TẦNG 1: HOME & GAME SELECTOR */
+        .stage { display: none; }
+        .stage.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .game-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: left;
+            margin-bottom: 25px;
+        }
+
+        .game-choice-card {
+            background: #fffdf8;
+            border: 2px solid var(--border-color);
+            border-radius: 18px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .game-choice-card:hover {
+            background: var(--card-hover);
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .game-choice-card.selected {
+            border-color: var(--primary);
+            background: #fff0f5;
+            box-shadow: 0 6px 16px rgba(255, 111, 156, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            font-family: "Fredoka", sans-serif;
+            color: var(--text-main);
+        }
+
+        .card-header .icon { font-size: 20px; color: var(--primary); }
+
+        .game-desc {
+            font-size: 13.5px;
+            color: var(--text-sub);
+            margin-top: 8px;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .game-choice-card.selected .game-desc {
+            display: block;
+            color: #7a5c6e;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            font-family: "Fredoka", sans-serif;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+            color: #ffffff;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 6px 14px rgba(255, 111, 156, 0.3);
+        }
+
+        .btn-main:hover:not(:disabled) {
+            transform: scale(1.03);
+            box-shadow: 0 8px 18px rgba(255, 111, 156, 0.4);
+        }
+
+        .btn-main:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* TẦNG 2: GAMEPLAY CARD */
+        .game-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge-game {
+            font-size: 13px;
+            font-weight: 700;
+            font-family: "Fredoka", sans-serif;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary) 0%, #ff8fb3 100%);
+            padding: 5px 14px;
+            border-radius: 999px;
+        }
+
+        .btn-quit {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            font-size: 13px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        .btn-quit:hover { color: var(--primary); background: rgba(255,111,156,0.08); }
+
+        .room-tag {
+            display: inline-block;
+            background: var(--accent-soft);
+            color: #a67c00;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .zh-question-box {
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin: 15px 0 25px 0;
+            color: var(--text-main);
+            text-align: left;
+        }
+
+        .follow-up-box {
+            background: var(--accent-soft);
+            border-left: 4px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #7a5c30;
+            text-align: left;
+            display: none;
+        }
+        .follow-up-box.show { display: block; }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 12px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            font-family: "Fredoka", sans-serif;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-hint {
+            background: #fffaf3;
+            border: 2px solid var(--accent);
+            color: #a67c00;
+        }
+        .btn-hint:hover { background: var(--accent-soft); }
+        .btn-next {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+            border: none;
+            color: #ffffff;
+            flex-grow: 1;
+            box-shadow: 0 5px 12px rgba(255, 111, 156, 0.3);
+        }
+        .btn-next:hover { transform: scale(1.02); }
+
+        .progress-indicator {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            min-width: 60px;
+        }
+
+        /* TẦNG 3: END SCREEN */
+        .end-icon { font-size: 55px; margin-bottom: 15px; }
+        .end-title { font-family: "Fredoka", sans-serif; font-size: 22px; color: var(--primary); margin-bottom: 10px; }
+        .end-desc { font-size: 14px; color: var(--text-sub); margin-bottom: 30px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+    <div class="sparkle-field" id="sparkle-field"></div>
+
+    <div class="brand">
+        <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="brandFlame" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ffe89a"/>
+                    <stop offset="50%" stop-color="#ffb148"/>
+                    <stop offset="100%" stop-color="#ff6f9c"/>
+                </linearGradient>
+            </defs>
+            <path fill="url(#brandFlame)" d="
+                M50 8
+                C55 18 64 22 68 31
+                C74 24 85 24 89 30
+                C83 34 79 39 79 47
+                C79 58 70 64 61 64
+                C66 70 66 79 61 87
+                C57 78 52 74 50 66
+                C48 74 43 78 39 87
+                C34 79 34 70 39 64
+                C30 64 21 58 21 47
+                C21 39 17 34 11 30
+                C15 24 26 24 32 31
+                C36 22 45 18 50 8
+                Z"/>
+            <circle cx="43" cy="38" r="2.6" fill="#5a3d4d"/>
+            <circle cx="57" cy="38" r="2.6" fill="#5a3d4d"/>
+            <circle cx="37" cy="44" r="3" fill="#ff9fbf" opacity="0.8"/>
+            <circle cx="63" cy="44" r="3" fill="#ff9fbf" opacity="0.8"/>
+        </svg>
+        <div class="brand-name">Phoenix</div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- ================= TẦNG 1: TRANG CHỦ & LỰA CHỌN ================= -->
+        <div id="stage-home" class="stage active">
+            <h1>✨ Let's Deep Talk ✨</h1>
+            <p class="subtitle">請選擇一個遊戲主題，深入探索彼此的內心世界</p>
+
+            <div class="game-grid">
+                <!-- Game 1 -->
+                <div class="game-choice-card" onclick="selectGame('Dilemma Auction', this)">
+                    <div class="card-header">
+                        <span>🍯 The Dilemma Auction</span>
+                        <span class="icon">➜</span>
+                    </div>
+                    <div class="game-desc">
+                        每個玩家擁有 100 點數。面對人生的各種價值交換、原則與現實抉擇，你願意為自己的信念付出多少代價？
+                    </div>
+                </div>
+
+                <!-- Game 2 -->
+                <div class="game-choice-card" onclick="selectGame('Hot Seat', this)">
+                    <div class="card-header">
+                        <span>🌸 Hot Seat</span>
+                        <span class="icon">➜</span>
+                    </div>
+                    <div class="game-desc">
+                        輪流坐上焦點焦點座椅，坦誠回答關於自我認知、隱藏情緒與人際關係的深層提問，放下防備直面真實。
+                    </div>
+                </div>
+
+                <!-- Game 3 -->
+                <div class="game-choice-card" onclick="selectGame('5 Curated Rooms', this)">
+                    <div class="card-header">
+                        <span>🎀 The 5 Curated Rooms</span>
+                        <span class="icon">➜</span>
+                    </div>
+                    <div class="game-desc">
+                        穿越五個心靈房間（鏡子、重擔、橋樑、邊界、地平線），從自我審視一步步走向對未來的期許與和解。
+                    </div>
+                </div>
+            </div>
+
+            <button id="btn-start" class="btn-main" disabled onclick="startGame()">開始遊戲</button>
+        </div>
+
+        <!-- ================= TẦNG 2: BÀN CHƠI / GAMEPLAY ================= -->
+        <div id="stage-game" class="stage">
+            <div class="game-topbar">
+                <span id="game-badge-name" class="badge-game">Game Name</span>
+                <button class="btn-quit" onclick="confirmEndGame()">結束遊戲 ✖</button>
+            </div>
+
+            <div id="room-tag" class="room-tag" style="display: none;"></div>
+            
+            <div id="question-box" class="zh-question-box">載入問題中...</div>
+
+            <div id="followup-box" class="follow-up-box">
+                <strong>🎯 追問 / 規則建議：</strong>
+                <div id="followup-text" style="margin-top: 5px;"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-action btn-hint" onclick="toggleHint()">💡 追問指引</button>
+                <span id="progress-text" class="progress-indicator">1 / 20</span>
+                <button class="btn-action btn-next" onclick="nextCard()">下一題 ➔</button>
+            </div>
+        </div>
+
+        <!-- ================= TẦNG 3: MÀN HÌNH KẾT THÚC ================= -->
+        <div id="stage-end" class="stage">
+            <div class="end-icon">✨</div>
+            <h2 class="end-title">對話已告一段落</h2>
+            <p class="end-desc">
+                感謝你們今晚的坦誠與傾聽。<br>
+                最珍貴的不是答案本身，而是一起探索內心的過程。
+            </p>
+            <button class="btn-main" onclick="resetToHome()">回到主頁 (重新開始)</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Small cute icon set (original doodle style) mixed in with the sparkles
+        const ICON_CORN = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="20" cy="18" rx="9" ry="15" fill="#ffd93d"/>
+            <circle cx="14" cy="9" r="1.8" fill="#fff6cf"/><circle cx="20" cy="9" r="1.8" fill="#fff6cf"/><circle cx="26" cy="9" r="1.8" fill="#fff6cf"/>
+            <circle cx="14" cy="15" r="1.8" fill="#fff6cf"/><circle cx="20" cy="15" r="1.8" fill="#fff6cf"/><circle cx="26" cy="15" r="1.8" fill="#fff6cf"/>
+            <circle cx="14" cy="21" r="1.8" fill="#fff6cf"/><circle cx="20" cy="21" r="1.8" fill="#fff6cf"/><circle cx="26" cy="21" r="1.8" fill="#fff6cf"/>
+            <path d="M9 29 Q20 39 31 29 Q20 33 9 29 Z" fill="#9ed36b"/>
+            <circle cx="16" cy="26" r="1.1" fill="#5a3d4d"/><circle cx="24" cy="26" r="1.1" fill="#5a3d4d"/>
+            <path d="M17 29 Q20 31 23 29" stroke="#5a3d4d" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        </svg>`;
+
+        const ICON_DOG = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 13 Q3 3 14 9 Q11 16 8 13 Z" fill="#ff9fbf"/>
+            <path d="M32 13 Q37 3 26 9 Q29 16 32 13 Z" fill="#ff9fbf"/>
+            <circle cx="20" cy="22" r="13" fill="#f7e3c6"/>
+            <circle cx="15" cy="21" r="1.8" fill="#5a3d4d"/><circle cx="25" cy="21" r="1.8" fill="#5a3d4d"/>
+            <ellipse cx="20" cy="26" rx="2.6" ry="1.8" fill="#5a3d4d"/>
+            <path d="M18 28 Q20 30 22 28" stroke="#5a3d4d" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+            <circle cx="10" cy="25" r="2.2" fill="#ffb6c9" opacity="0.7"/><circle cx="30" cy="25" r="2.2" fill="#ffb6c9" opacity="0.7"/>
+        </svg>`;
+
+        const ICON_PHOENIX = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="pxGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stop-color="#ffe89a"/>
+                    <stop offset="50%" stop-color="#ffb148"/>
+                    <stop offset="100%" stop-color="#ff6f9c"/>
+                </linearGradient>
+            </defs>
+            <path fill="url(#pxGrad)" d="
+                M50 8 C55 18 64 22 68 31 C74 24 85 24 89 30 C83 34 79 39 79 47
+                C79 58 70 64 61 64 C66 70 66 79 61 87 C57 78 52 74 50 66
+                C48 74 43 78 39 87 C34 79 34 70 39 64 C30 64 21 58 21 47
+                C21 39 17 34 11 30 C15 24 26 24 32 31 C36 22 45 18 50 8 Z"/>
+            <circle cx="43" cy="38" r="2.6" fill="#5a3d4d"/>
+            <circle cx="57" cy="38" r="2.6" fill="#5a3d4d"/>
+            <circle cx="37" cy="44" r="3" fill="#ff9fbf" opacity="0.8"/>
+            <circle cx="63" cy="44" r="3" fill="#ff9fbf" opacity="0.8"/>
+        </svg>`;
+
+        // Generate soft twinkling stars, sparkles, and cute icons across the background
+        (function spawnSparkles() {
+            const field = document.getElementById('sparkle-field');
+            const glyphs = ['✨', '⭐', '💛', '🎀'];
+            const icons = [ICON_CORN, ICON_CORN, ICON_DOG, ICON_PHOENIX]; // corn weighted heavier
+            const count = 24;
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement('span');
+                s.className = 'sparkle';
+                // Roughly 45% of spawns are now cute icons (corn shows up most often), rest are sparkle glyphs
+                if (Math.random() < 0.45) {
+                    s.innerHTML = icons[Math.floor(Math.random() * icons.length)];
+                } else {
+                    s.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+                }
+                s.style.left = `${(Math.random() * 100).toFixed(1)}%`;
+                s.style.top = `${(Math.random() * 100).toFixed(1)}%`;
+                s.style.setProperty('--sp-size', `${(Math.random() * 14 + 16).toFixed(0)}px`);
+                s.style.setProperty('--sp-dur', `${(Math.random() * 2 + 2.5).toFixed(1)}s`);
+                s.style.setProperty('--sp-delay', `${(Math.random() * 4).toFixed(1)}s`);
+                field.appendChild(s);
+            }
+        })();
+
+        // Dữ liệu 60 câu hỏi từ file Excel
+        const gameData = {
+            "Dilemma Auction": [
+                {"No.": 1, "Question": "假設你有100點可用於競標。你最多願意付出多少點，用10年的職涯成功換取10年的平靜生活，但成就較少？為什麼？", "Gameplay / Follow-up": "玩家必須先出價，再進行解釋。"},
+                {"No.": 2, "Question": "你願意付出多少點，來確定你現在愛的人是否就是你將來會結婚的對象？你真的想知道嗎？", "Gameplay / Follow-up": "如果不想競標，必須解釋「不知道」所要付出的代價。"},
+                {"No.": 3, "Question": "你願意付出多少點來挽救一段維持了10年的友誼，但代價是必須承認傷害對方的人正是你自己？", "Gameplay / Follow-up": "出價越高，回答就必須越具體。"},
+                {"No.": 4, "Question": "你願意付出多少點，讓所有人都能完全正確地理解你，但代價是你再也無法控制他們之後會怎麼想？", "Gameplay / Follow-up": "討論「被理解」與「被喜歡」之間的差異。"},
+                {"No.": 5, "Question": "如果今天立刻獲得100億越南盾的代價，是必須放棄自己真正喜歡的工作，你願意付出多少點？", "Gameplay / Follow-up": "玩家必須說出願意支付的最高點數。"},
+                {"No.": 6, "Question": "你願意付出多少點來換取完全自由的一年，但之後必須有一年按照別人安排的日程生活？", "Gameplay / Follow-up": "追問：自由的價值來自持續的時間，還是選擇的權利？"},
+                {"No.": 7, "Question": "如果消除過去一個重大錯誤，也會同時抹去你從中學到的教訓，你願意付出多少點？", "Gameplay / Follow-up": "玩家必須先選擇保留或消除，再進行競標。"},
+                {"No.": 8, "Question": "你願意付出多少點，換取與一位親人多相處20年，但代價是放棄一個可能徹底改變你職涯的機會？", "Gameplay / Follow-up": "請說明是什麼讓這個決定如此困難。"},
+                {"No.": 9, "Question": "你願意付出多少點，來得知一個關於自己、令人痛苦且目前尚未察查的真相？", "Gameplay / Follow-up": "競標後，玩家猜測那個真相可能是什麼。"},
+                {"No.": 10, "Question": "你願意付出多少點，來看清自己40歲時的人生，但看過之後不能改變任何事情？", "Gameplay / Follow-up": "討論：預先知道未來會不會讓人失去動力？"},
+                {"No.": 11, "Question": "你願意付出多少點，換取唯一一次實現最大夢想的機會，但有50%的可能會徹底失敗？", "Gameplay / Follow-up": "玩家必須說出自己能接受的最低成功機率。"},
+                {"No.": 12, "Question": "如果沒有人知道你幫助了100位陌生人，而且你也得不到任何回報，你願意付出多少點去做這件事？", "Gameplay / Follow-up": "出價反映的是行動本身的價值，還是被認可的價值？"},
+                {"No.": 13, "Question": "如果贏得一場非常重要的爭論，代價是你必須私下承認自己明知有錯，你願意付出多少點？", "Gameplay / Follow-up": "玩家說明是什麼讓自己難以認錯。"},
+                {"No.": 14, "Question": "你願意付出多少點，讓自己的一個祕密從所有人的記憶中消失，但你也會失去關於它的記憶？", "Gameplay / Follow-up": "是否有某件事你不想記得，卻又不願忘記？"},
+                {"No.": 15, "Question": "你願意付出多少點來實現最大的目標，但在整整10年內不得告訴任何人？", "Gameplay / Follow-up": "區分成功本身與被認可的需求。"},
+                {"No.": 16, "Question": "你願意付出多少點，讓自己永遠對生活感到滿足，但代價是失去追求更大目標的渴望？", "Gameplay / Follow-up": "追問：幸福需要野心嗎？"},
+                {"No.": 17, "Question": "你願意付出多少點，讓自己不再與他人比較，但代價是失去一部分競爭動力？", "Gameplay / Follow-up": "玩家解釋比較在自己人生中扮演的角色。"},
+                {"No.": 18, "Question": "你願意付出多少點，保護一位好友免於承受某個嚴重錯誤的後果，即使你知道那是對方故意造成的？", "Gameplay / Follow-up": "設定界線：忠誠到什麼程度會變成共犯？"},
+                {"No.": 19, "Question": "你願意付出多少點，來對一位已失去聯絡的朋友說最後一句話，但你不會知道對方將如何回應？", "Gameplay / Follow-up": "目的是探索人對情感了結的需求。"},
+                {"No.": 20, "Question": "如果成為自己一直想成為的樣子，代價是身邊所有人都必須重新適應一個截然不同的你，你願意付出多少點？", "Gameplay / Follow-up": "最後追問：你內在的什麼因素正在阻礙改變？"}
+            ],
+            "Hot Seat": [
+                {"No.": 1, "Question": "別人第一次見到你時，最常誤解你哪一點？", "Gameplay / Follow-up": "坐在 Hot Seat 的玩家回答；其他人只能提出一個追問。"},
+                {"No.": 2, "Question": "什麼時候你最能感覺自己真正做自己？", "Gameplay / Follow-up": "請分享一個具體情境。"},
+                {"No.": 3, "Question": "你認為別人欣賞你的哪一點，比你自己欣賞得更多？", "Gameplay / Follow-up": "全組可以各提出一個詞來形容。"},
+                {"No.": 4, "Question": "有什麼事情你試著裝作不在意，其實非常在意？", "Gameplay / Follow-up": "如果不想分享，可以跳過。"},
+                {"No.": 5, "Question": "如果拿掉所有成就、工作與社會角色，你還希望別人因為什麼而記住你？", "Gameplay / Follow-up": "不得使用職稱或成就作答。"},
+                {"No.": 6, "Question": "你最近一次改變對某件重要事情的看法，是什麼時候？", "Gameplay / Follow-up": "說明是什麼讓你改變想法。"},
+                {"No.": 7, "Question": "生活中，你正在逃避哪一場對話？", "Gameplay / Follow-up": "如果不願意，不必說出對方的名字。"},
+                {"No.": 8, "Question": "有沒有一個你希望別人問、卻從來沒有人問過你的問題？", "Gameplay / Follow-up": "玩家自己提出問題，然後自行回答。"},
+                {"No.": 9, "Question": "當你害怕自己不夠好時，通常會做什麼？", "Gameplay / Follow-up": "區分有幫助的行為與逃避行為。"},
+                {"No.": 10, "Question": "你覺得自己更多是在按照自己的願望生活，還是在按照別人的期待生活？", "Gameplay / Follow-up": "先以1至10分評分，再進行解釋。"},
+                {"No.": 11, "Question": "和一個人在一起時，什麼會讓你感到安全？", "Gameplay / Follow-up": "說出兩個具體行為。"},
+                {"No.": 12, "Question": "你比較容易原諒別人，還是原諒自己？", "Gameplay / Follow-up": "如果願意，請分享一個例子。"},
+                {"No.": 13, "Question": "你最需要朋友給你什麼，卻常常不好意思開口要求？", "Gameplay / Follow-up": "在玩家回答前，小組可以先猜。"},
+                {"No.": 14, "Question": "你是否曾因為某個人不再適合現在的你，而選擇與對方疏遠？", "Gameplay / Follow-up": "聚焦於學到的課題，而不是評判對方。"},
+                {"No.": 15, "Question": "你希望所愛的人理解你的哪一點，卻很難用言語說出來？", "Gameplay / Follow-up": "玩家有權跳過。"},
+                {"No.": 16, "Question": "如果10年後的你遇見今天的你，未來的你會因為什麼而感謝現在的你？", "Gameplay / Follow-up": "說出一個具體行動。"},
+                {"No.": 17, "Question": "如果不害怕失敗，未來12個月你會嘗試什麼？", "Gameplay / Follow-up": "把答案轉化為一個小行動。"},
+                {"No.": 18, "Question": "你害怕自己變成怎樣的人？", "Gameplay / Follow-up": "如果問題太私密，不必解釋。"},
+                {"No.": 19, "Question": "為了將來擁有更好的生活，你今天正在犧牲什麼？", "Gameplay / Follow-up": "評估這個代價是否值得。"},
+                {"No.": 20, "Question": "如果只能保留一個關於人生的信念，你會選擇哪一個？", "Gameplay / Follow-up": "用一句簡短的話作結。"}
+            ],
+            "5 Curated Rooms": [
+                {"No.": 1, "Room": "The Mirror", "Question": "當你不需要給任何人留下好印象時，你認為自己是怎樣的人？", "Gameplay / Follow-up": "深度暖身"},
+                {"No.": 2, "Room": "The Mirror", "Question": "哪一句對你的評價曾讓你不舒服，但後來你發現其中確實有幾分道理？", "Gameplay / Follow-up": "自我覺察"},
+                {"No.": 3, "Room": "The Mirror", "Question": "你通常想證明自己哪一點？", "Gameplay / Follow-up": "深入探索被認可的需求"},
+                {"No.": 4, "Room": "The Mirror", "Question": "當你感到不安全時，會出現哪一個版本的自己？", "Gameplay / Follow-up": "辨識防衛機制"},
+                {"No.": 5, "Room": "The Weight", "Question": "家庭或社會的哪一項期待，最影響你的選擇？", "Gameplay / Follow-up": "可以從概括的角度回答"},
+                {"No.": 6, "Room": "The Weight", "Question": "你正在對什麼事情說「好」，只是因為害怕說「不」的後果？", "Gameplay / Follow-up": "鼓勵舉出一個例子"},
+                {"No.": 7, "Room": "The Weight", "Question": "如果失敗不會降低你的價值，你會做出什麼不同的決定？", "Gameplay / Follow-up": "將失敗與自我價值分開"},
+                {"No.": 8, "Room": "The Weight", "Question": "為了實現目前的目標，你正在犧牲什麼？", "Gameplay / Follow-up": "同時說明收穫與代價"},
+                {"No.": 9, "Room": "The Bridge", "Question": "什麼會讓你真正信任一個人？", "Gameplay / Follow-up": "選出三個具體跡象"},
+                {"No.": 10, "Room": "The Bridge", "Question": "你通常如何愛別人？你又希望別人如何愛你？", "Gameplay / Follow-up": "比較付出與接受"},
+                {"No.": 11, "Room": "The Bridge", "Question": "你曾經沒有設下哪一道界線，後來因此付出了代價？", "Gameplay / Follow-up": "聚焦於學到的課題"},
+                {"No.": 12, "Room": "The Bridge", "Question": "你認為是什麼讓一段友誼能夠跨越人生的不同階段而持續下去？", "Gameplay / Follow-up": "尋找原則，而不是具體例子"},
+                {"No.": 13, "Room": "The Edge", "Question": "有沒有一個關於人生的真相，你明明知道，卻仍經常反其道而行？", "Gameplay / Follow-up": "這是一個自我挑戰問題"},
+                {"No.": 14, "Room": "The Edge", "Question": "你正在拖延什麼，因為你知道一旦開始，就必須做出改變？", "Gameplay / Follow-up": "可以跳過"},
+                {"No.": 15, "Room": "The Edge", "Question": "有什麼事情你仍未原諒自己？", "Gameplay / Follow-up": "不要強迫玩家講述事件細節"},
+                {"No.": 16, "Room": "The Edge", "Question": "發生爭執時，你通常更想被理解、被認可，還是獲勝？", "Gameplay / Follow-up": "先選一項，再進行解釋"},
+                {"No.": 17, "Room": "The Horizon", "Question": "如果人生不需要向任何人證明什麼，你會把時間花在哪裡？", "Gameplay / Follow-up": "探索內在價值觀的問題"},
+                {"No.": 18, "Room": "The Horizon", "Question": "你最希望10年後的自己與現在相比，有哪一點不同？", "Gameplay / Follow-up": "選擇一項改變"},
+                {"No.": 19, "Room": "The Horizon", "Question": "生活中，你希望什麼更多一些，又希望什麼更少一些？", "Gameplay / Follow-up": "建立一組「更多／更少」"},
+                {"No.": 20, "Room": "The Horizon", "Question": "經過這次對話後，有沒有一件事是你想換個角度看待的？", "Gameplay / Follow-up": "收尾問題"}
+            ]
+        };
+
+        // State variables
+        let selectedGameName = null;
+        let pool = [];
+        let totalCount = 0;
+        let playedCount = 0;
+
+        // Stage 1: Chọn Game
+        function selectGame(gameName, cardElement) {
+            selectedGameName = gameName;
+            document.querySelectorAll('.game-choice-card').forEach(card => card.classList.remove('selected'));
+            cardElement.classList.add('selected');
+            document.getElementById('btn-start').removeAttribute('disabled');
+        }
+
+        // Chuyển Stage
+        function showStage(stageId) {
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.getElementById(stageId).classList.add('active');
+        }
+
+        // Bắt đầu game (Stage 1 -> Stage 2)
+        function startGame() {
+            if (!selectedGameName) return;
+            
+            const list = gameData[selectedGameName];
+            totalCount = list.length;
+            playedCount = 0;
+            // Tạo mảng chỉ số ngẫu nhiên không lặp lại
+            pool = Array.from({ length: totalCount }, (_, i) => i);
+
+            document.getElementById('game-badge-name').innerText = selectedGameName;
+            showStage('stage-game');
+            nextCard();
+        }
+
+        // Bốc thẻ bài tiếp theo
+        function nextCard() {
+            if (pool.length === 0) {
+                // Đã hết bài -> Chuyển sang Tầng 3
+                showStage('stage-end');
+                return;
+            }
+
+            const randIndex = Math.floor(Math.random() * pool.length);
+            const cardIndex = pool.splice(randIndex, 1)[0];
+            playedCount++;
+
+            const currentItem = gameData[selectedGameName][cardIndex];
+
+            // Hiển thị câu hỏi
+            document.getElementById('question-box').innerText = currentItem.Question;
+
+            // Xử lý Room tag (dành cho 5 Curated Rooms)
+            const roomTag = document.getElementById('room-tag');
+            if (currentItem.Room) {
+                roomTag.innerText = `🚪 ${currentItem.Room}`;
+                roomTag.style.display = 'inline-block';
+            } else {
+                roomTag.style.display = 'none';
+            }
+
+            // Gán gợi ý & ẩn mặc định
+            document.getElementById('followup-text').innerText = currentItem['Gameplay / Follow-up'] || '';
+            document.getElementById('followup-box').classList.remove('show');
+
+            // Cập nhật tiến độ
+            document.getElementById('progress-text').innerText = `${playedCount} / ${totalCount}`;
+        }
+
+        function toggleHint() {
+            document.getElementById('followup-box').classList.toggle('show');
+        }
+
+        function confirmEndGame() {
+            if (confirm("確定要提前結束這場遊戲嗎？")) {
+                showStage('stage-end');
+            }
+        }
+
+        // Tầng 3 -> Tầng 1 (Reset)
+        function resetToHome() {
+            selectedGameName = null;
+            document.querySelectorAll('.game-choice-card').forEach(card => card.classList.remove('selected'));
+            document.getElementById('btn-start').setAttribute('disabled', 'true');
+            showStage('stage-home');
+        }
+    </script>
+</body>
+</html>
