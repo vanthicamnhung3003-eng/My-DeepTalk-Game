@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deep Talk Night</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Phoenix">
-  
-  <!-- Icon hiển thị ngoài màn hình chính (Dùng trực tiếp icon Phoenix) -->
-  <link rel="apple-touch-icon" href="https://api.iconify.design/game-icons:phoenix-crown.svg?color=%23ff5a1f">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -254,65 +248,64 @@
         }
 
         .zh-question-box {
-            min-height: 120px;
+            min-height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             font-weight: 700;
             line-height: 1.6;
-            margin: 15px 0 25px 0;
+            margin: 15px 0 20px 0;
             color: var(--text-main);
             text-align: left;
         }
 
+        /* Khung Follow-up hiển thị trực tiếp */
         .follow-up-box {
             background: var(--accent-soft);
             border-left: 4px solid var(--accent);
-            padding: 12px 16px;
-            border-radius: 12px;
+            padding: 14px 18px;
+            border-radius: 14px;
             margin-bottom: 25px;
-            font-size: 14px;
+            font-size: 14.5px;
             color: #7a5c30;
             text-align: left;
-            display: none;
+            display: block;
+            line-height: 1.5;
         }
-        .follow-up-box.show { display: block; }
+
+        .follow-up-title {
+            font-weight: 800;
+            font-family: "Fredoka", sans-serif;
+            color: #a67c00;
+            margin-bottom: 4px;
+            font-size: 13.5px;
+        }
 
         .controls {
             display: flex;
-            gap: 12px;
+            gap: 15px;
             justify-content: space-between;
             align-items: center;
         }
 
-        .btn-action {
-            padding: 12px 18px;
-            font-size: 14px;
+        .btn-next {
+            padding: 12px 28px;
+            font-size: 15px;
             font-weight: 700;
             font-family: "Fredoka", sans-serif;
             border-radius: 999px;
             cursor: pointer;
             transition: 0.2s;
-        }
-
-        .btn-hint {
-            background: #fffaf3;
-            border: 2px solid var(--accent);
-            color: #a67c00;
-        }
-        .btn-hint:hover { background: var(--accent-soft); }
-        .btn-next {
             background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
             border: none;
             color: #ffffff;
-            flex-grow: 1;
             box-shadow: 0 5px 12px rgba(255, 111, 156, 0.3);
         }
-        .btn-next:hover { transform: scale(1.02); }
+        .btn-next:hover { transform: scale(1.03); }
 
         .progress-indicator {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--text-sub);
             min-width: 60px;
@@ -386,7 +379,7 @@
                         <span class="icon">➜</span>
                     </div>
                     <div class="game-desc">
-                        輪流坐上焦點焦點座椅，坦誠回答關於自我認知、隱藏情緒與人際關係的深層提問，放下防備直面真實。
+                        輪流坐上焦點座椅，坦誠回答關於自我認知、隱藏情緒與人際關係的深層提問，放下防備直面真實。
                     </div>
                 </div>
 
@@ -416,15 +409,15 @@
             
             <div id="question-box" class="zh-question-box">載入問題中...</div>
 
+            <!-- Gợi ý Gameplay / Follow-up hiển thị trực tiếp dưới câu hỏi -->
             <div id="followup-box" class="follow-up-box">
-                <strong>🎯 追問 / 規則建議：</strong>
-                <div id="followup-text" style="margin-top: 5px;"></div>
+                <div class="follow-up-title">🎯 玩法指引 / 追問：</div>
+                <div id="followup-text"></div>
             </div>
 
             <div class="controls">
-                <button class="btn-action btn-hint" onclick="toggleHint()">💡 追問指引</button>
                 <span id="progress-text" class="progress-indicator">1 / 20</span>
-                <button class="btn-action btn-next" onclick="nextCard()">下一題 ➔</button>
+                <button class="btn-next" onclick="nextCard()">下一題 ➔</button>
             </div>
         </div>
 
@@ -442,7 +435,14 @@
     </div>
 
     <script>
-        // Small cute icon set (original doodle style) mixed in with the sparkles
+        // Dán 3 link CSV từ Google Sheets vào đây
+        const CSV_URLS = {
+            "Dilemma Auction": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXhYXVWIyVQ0ZoQS1IubgWjNhUAlD2fHA9dWTOWJXzLDArhj-0jcJtQVazfMT6Tw/pub?gid=316465037&single=true&output=csv",
+            "Hot Seat": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXhYXVWIyVQ0ZoQS1IubgWjNhUAlD2fHA9dWTOWJXzLDArhj-0jcJtQVazfMT6Tw/pub?gid=1061234524&single=true&output=csv",
+            "5 Curated Rooms": "https://docs.google.com/spreadsheets/d/e/2PACX-1vRXhYXVWIyVQ0ZoQS1IubgWjNhUAlD2fHA9dWTOWJXzLDArhj-0jcJtQVazfMT6Tw/pub?gid=271591736&single=true&output=csv"
+        };
+
+        // Cute icon set
         const ICON_CORN = `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
             <ellipse cx="20" cy="18" rx="9" ry="15" fill="#ffd93d"/>
             <circle cx="14" cy="9" r="1.8" fill="#fff6cf"/><circle cx="20" cy="9" r="1.8" fill="#fff6cf"/><circle cx="26" cy="9" r="1.8" fill="#fff6cf"/>
@@ -482,16 +482,14 @@
             <circle cx="63" cy="44" r="3" fill="#ff9fbf" opacity="0.8"/>
         </svg>`;
 
-        // Generate soft twinkling stars, sparkles, and cute icons across the background
         (function spawnSparkles() {
             const field = document.getElementById('sparkle-field');
             const glyphs = ['✨', '⭐', '💛', '🎀'];
-            const icons = [ICON_CORN, ICON_CORN, ICON_DOG, ICON_PHOENIX]; // corn weighted heavier
+            const icons = [ICON_CORN, ICON_CORN, ICON_DOG, ICON_PHOENIX];
             const count = 24;
             for (let i = 0; i < count; i++) {
                 const s = document.createElement('span');
                 s.className = 'sparkle';
-                // Roughly 45% of spawns are now cute icons (corn shows up most often), rest are sparkle glyphs
                 if (Math.random() < 0.45) {
                     s.innerHTML = icons[Math.floor(Math.random() * icons.length)];
                 } else {
@@ -506,83 +504,68 @@
             }
         })();
 
-        // Dữ liệu 60 câu hỏi từ file Excel
-        const gameData = {
-            "Dilemma Auction": [
-                {"No.": 1, "Question": "假設你有100點可用於競標。你最多願意付出多少點，用10年的職涯成功換取10年的平靜生活，但成就較少？為什麼？", "Gameplay / Follow-up": "玩家必須先出價，再進行解釋。"},
-                {"No.": 2, "Question": "你願意付出多少點，來確定你現在愛的人是否就是你將來會結婚的對象？你真的想知道嗎？", "Gameplay / Follow-up": "如果不想競標，必須解釋「不知道」所要付出的代價。"},
-                {"No.": 3, "Question": "你願意付出多少點來挽救一段維持了10年的友誼，但代價是必須承認傷害對方的人正是你自己？", "Gameplay / Follow-up": "出價越高，回答就必須越具體。"},
-                {"No.": 4, "Question": "你願意付出多少點，讓所有人都能完全正確地理解你，但代價是你再也無法控制他們之後會怎麼想？", "Gameplay / Follow-up": "討論「被理解」與「被喜歡」之間的差異。"},
-                {"No.": 5, "Question": "如果今天立刻獲得100億越南盾的代價，是必須放棄自己真正喜歡的工作，你願意付出多少點？", "Gameplay / Follow-up": "玩家必須說出願意支付的最高點數。"},
-                {"No.": 6, "Question": "你願意付出多少點來換取完全自由的一年，但之後必須有一年按照別人安排的日程生活？", "Gameplay / Follow-up": "追問：自由的價值來自持續的時間，還是選擇的權利？"},
-                {"No.": 7, "Question": "如果消除過去一個重大錯誤，也會同時抹去你從中學到的教訓，你願意付出多少點？", "Gameplay / Follow-up": "玩家必須先選擇保留或消除，再進行競標。"},
-                {"No.": 8, "Question": "你願意付出多少點，換取與一位親人多相處20年，但代價是放棄一個可能徹底改變你職涯的機會？", "Gameplay / Follow-up": "請說明是什麼讓這個決定如此困難。"},
-                {"No.": 9, "Question": "你願意付出多少點，來得知一個關於自己、令人痛苦且目前尚未察查的真相？", "Gameplay / Follow-up": "競標後，玩家猜測那個真相可能是什麼。"},
-                {"No.": 10, "Question": "你願意付出多少點，來看清自己40歲時的人生，但看過之後不能改變任何事情？", "Gameplay / Follow-up": "討論：預先知道未來會不會讓人失去動力？"},
-                {"No.": 11, "Question": "你願意付出多少點，換取唯一一次實現最大夢想的機會，但有50%的可能會徹底失敗？", "Gameplay / Follow-up": "玩家必須說出自己能接受的最低成功機率。"},
-                {"No.": 12, "Question": "如果沒有人知道你幫助了100位陌生人，而且你也得不到任何回報，你願意付出多少點去做這件事？", "Gameplay / Follow-up": "出價反映的是行動本身的價值，還是被認可的價值？"},
-                {"No.": 13, "Question": "如果贏得一場非常重要的爭論，代價是你必須私下承認自己明知有錯，你願意付出多少點？", "Gameplay / Follow-up": "玩家說明是什麼讓自己難以認錯。"},
-                {"No.": 14, "Question": "你願意付出多少點，讓自己的一個祕密從所有人的記憶中消失，但你也會失去關於它的記憶？", "Gameplay / Follow-up": "是否有某件事你不想記得，卻又不願忘記？"},
-                {"No.": 15, "Question": "你願意付出多少點來實現最大的目標，但在整整10年內不得告訴任何人？", "Gameplay / Follow-up": "區分成功本身與被認可的需求。"},
-                {"No.": 16, "Question": "你願意付出多少點，讓自己永遠對生活感到滿足，但代價是失去追求更大目標的渴望？", "Gameplay / Follow-up": "追問：幸福需要野心嗎？"},
-                {"No.": 17, "Question": "你願意付出多少點，讓自己不再與他人比較，但代價是失去一部分競爭動力？", "Gameplay / Follow-up": "玩家解釋比較在自己人生中扮演的角色。"},
-                {"No.": 18, "Question": "你願意付出多少點，保護一位好友免於承受某個嚴重錯誤的後果，即使你知道那是對方故意造成的？", "Gameplay / Follow-up": "設定界線：忠誠到什麼程度會變成共犯？"},
-                {"No.": 19, "Question": "你願意付出多少點，來對一位已失去聯絡的朋友說最後一句話，但你不會知道對方將如何回應？", "Gameplay / Follow-up": "目的是探索人對情感了結的需求。"},
-                {"No.": 20, "Question": "如果成為自己一直想成為的樣子，代價是身邊所有人都必須重新適應一個截然不同的你，你願意付出多少點？", "Gameplay / Follow-up": "最後追問：你內在的什麼因素正在阻礙改變？"}
-            ],
-            "Hot Seat": [
-                {"No.": 1, "Question": "別人第一次見到你時，最常誤解你哪一點？", "Gameplay / Follow-up": "坐在 Hot Seat 的玩家回答；其他人只能提出一個追問。"},
-                {"No.": 2, "Question": "什麼時候你最能感覺自己真正做自己？", "Gameplay / Follow-up": "請分享一個具體情境。"},
-                {"No.": 3, "Question": "你認為別人欣賞你的哪一點，比你自己欣賞得更多？", "Gameplay / Follow-up": "全組可以各提出一個詞來形容。"},
-                {"No.": 4, "Question": "有什麼事情你試著裝作不在意，其實非常在意？", "Gameplay / Follow-up": "如果不想分享，可以跳過。"},
-                {"No.": 5, "Question": "如果拿掉所有成就、工作與社會角色，你還希望別人因為什麼而記住你？", "Gameplay / Follow-up": "不得使用職稱或成就作答。"},
-                {"No.": 6, "Question": "你最近一次改變對某件重要事情的看法，是什麼時候？", "Gameplay / Follow-up": "說明是什麼讓你改變想法。"},
-                {"No.": 7, "Question": "生活中，你正在逃避哪一場對話？", "Gameplay / Follow-up": "如果不願意，不必說出對方的名字。"},
-                {"No.": 8, "Question": "有沒有一個你希望別人問、卻從來沒有人問過你的問題？", "Gameplay / Follow-up": "玩家自己提出問題，然後自行回答。"},
-                {"No.": 9, "Question": "當你害怕自己不夠好時，通常會做什麼？", "Gameplay / Follow-up": "區分有幫助的行為與逃避行為。"},
-                {"No.": 10, "Question": "你覺得自己更多是在按照自己的願望生活，還是在按照別人的期待生活？", "Gameplay / Follow-up": "先以1至10分評分，再進行解釋。"},
-                {"No.": 11, "Question": "和一個人在一起時，什麼會讓你感到安全？", "Gameplay / Follow-up": "說出兩個具體行為。"},
-                {"No.": 12, "Question": "你比較容易原諒別人，還是原諒自己？", "Gameplay / Follow-up": "如果願意，請分享一個例子。"},
-                {"No.": 13, "Question": "你最需要朋友給你什麼，卻常常不好意思開口要求？", "Gameplay / Follow-up": "在玩家回答前，小組可以先猜。"},
-                {"No.": 14, "Question": "你是否曾因為某個人不再適合現在的你，而選擇與對方疏遠？", "Gameplay / Follow-up": "聚焦於學到的課題，而不是評判對方。"},
-                {"No.": 15, "Question": "你希望所愛的人理解你的哪一點，卻很難用言語說出來？", "Gameplay / Follow-up": "玩家有權跳過。"},
-                {"No.": 16, "Question": "如果10年後的你遇見今天的你，未來的你會因為什麼而感謝現在的你？", "Gameplay / Follow-up": "說出一個具體行動。"},
-                {"No.": 17, "Question": "如果不害怕失敗，未來12個月你會嘗試什麼？", "Gameplay / Follow-up": "把答案轉化為一個小行動。"},
-                {"No.": 18, "Question": "你害怕自己變成怎樣的人？", "Gameplay / Follow-up": "如果問題太私密，不必解釋。"},
-                {"No.": 19, "Question": "為了將來擁有更好的生活，你今天正在犧牲什麼？", "Gameplay / Follow-up": "評估這個代價是否值得。"},
-                {"No.": 20, "Question": "如果只能保留一個關於人生的信念，你會選擇哪一個？", "Gameplay / Follow-up": "用一句簡短的話作結。"}
-            ],
-            "5 Curated Rooms": [
-                {"No.": 1, "Room": "The Mirror", "Question": "當你不需要給任何人留下好印象時，你認為自己是怎樣的人？", "Gameplay / Follow-up": "深度暖身"},
-                {"No.": 2, "Room": "The Mirror", "Question": "哪一句對你的評價曾讓你不舒服，但後來你發現其中確實有幾分道理？", "Gameplay / Follow-up": "自我覺察"},
-                {"No.": 3, "Room": "The Mirror", "Question": "你通常想證明自己哪一點？", "Gameplay / Follow-up": "深入探索被認可的需求"},
-                {"No.": 4, "Room": "The Mirror", "Question": "當你感到不安全時，會出現哪一個版本的自己？", "Gameplay / Follow-up": "辨識防衛機制"},
-                {"No.": 5, "Room": "The Weight", "Question": "家庭或社會的哪一項期待，最影響你的選擇？", "Gameplay / Follow-up": "可以從概括的角度回答"},
-                {"No.": 6, "Room": "The Weight", "Question": "你正在對什麼事情說「好」，只是因為害怕說「不」的後果？", "Gameplay / Follow-up": "鼓勵舉出一個例子"},
-                {"No.": 7, "Room": "The Weight", "Question": "如果失敗不會降低你的價值，你會做出什麼不同的決定？", "Gameplay / Follow-up": "將失敗與自我價值分開"},
-                {"No.": 8, "Room": "The Weight", "Question": "為了實現目前的目標，你正在犧牲什麼？", "Gameplay / Follow-up": "同時說明收穫與代價"},
-                {"No.": 9, "Room": "The Bridge", "Question": "什麼會讓你真正信任一個人？", "Gameplay / Follow-up": "選出三個具體跡象"},
-                {"No.": 10, "Room": "The Bridge", "Question": "你通常如何愛別人？你又希望別人如何愛你？", "Gameplay / Follow-up": "比較付出與接受"},
-                {"No.": 11, "Room": "The Bridge", "Question": "你曾經沒有設下哪一道界線，後來因此付出了代價？", "Gameplay / Follow-up": "聚焦於學到的課題"},
-                {"No.": 12, "Room": "The Bridge", "Question": "你認為是什麼讓一段友誼能夠跨越人生的不同階段而持續下去？", "Gameplay / Follow-up": "尋找原則，而不是具體例子"},
-                {"No.": 13, "Room": "The Edge", "Question": "有沒有一個關於人生的真相，你明明知道，卻仍經常反其道而行？", "Gameplay / Follow-up": "這是一個自我挑戰問題"},
-                {"No.": 14, "Room": "The Edge", "Question": "你正在拖延什麼，因為你知道一旦開始，就必須做出改變？", "Gameplay / Follow-up": "可以跳過"},
-                {"No.": 15, "Room": "The Edge", "Question": "有什麼事情你仍未原諒自己？", "Gameplay / Follow-up": "不要強迫玩家講述事件細節"},
-                {"No.": 16, "Room": "The Edge", "Question": "發生爭執時，你通常更想被理解、被認可，還是獲勝？", "Gameplay / Follow-up": "先選一項，再進行解釋"},
-                {"No.": 17, "Room": "The Horizon", "Question": "如果人生不需要向任何人證明什麼，你會把時間花在哪裡？", "Gameplay / Follow-up": "探索內在價值觀的問題"},
-                {"No.": 18, "Room": "The Horizon", "Question": "你最希望10年後的自己與現在相比，有哪一點不同？", "Gameplay / Follow-up": "選擇一項改變"},
-                {"No.": 19, "Room": "The Horizon", "Question": "生活中，你希望什麼更多一些，又希望什麼更少一些？", "Gameplay / Follow-up": "建立一組「更多／更少」"},
-                {"No.": 20, "Room": "The Horizon", "Question": "經過這次對話後，有沒有一件事是你想換個角度看待的？", "Gameplay / Follow-up": "收尾問題"}
-            ]
+        // Bộ nhớ động lưu trữ dữ liệu tải từ Sheets
+        let gameData = {
+            "Dilemma Auction": [],
+            "Hot Seat": [],
+            "5 Curated Rooms": []
         };
 
-        // State variables
+        // Hàm xử lý chuỗi CSV chuẩn
+        function parseCSV(text) {
+            let p = '', c = '', r = [];
+            let q = false;
+            let row = [''];
+            for (let i = 0; i < text.length; i++) {
+                c = text[i];
+                let next = text[i+1];
+                if (c === '"') {
+                    if (q && next === '"') { row[row.length - 1] += '"'; i++; }
+                    else { q = !q; }
+                } else if (c === ',' && !q) {
+                    row.push('');
+                } else if ((c === '\r' || c === '\n') && !q) {
+                    if (c === '\r' && next === '\n') i++;
+                    r.push(row);
+                    row = [''];
+                } else {
+                    row[row.length - 1] += c;
+                }
+            }
+            if (row.length > 1 || row[0] !== '') r.push(row);
+            
+            if (r.length < 2) return [];
+            const headers = r[0].map(h => h.trim());
+            return r.slice(1).map(values => {
+                let obj = {};
+                headers.forEach((h, idx) => {
+                    obj[h] = (values[idx] || '').trim();
+                });
+                return obj;
+            }).filter(item => item.Question && item.Question.length > 0);
+        }
+
+        // Tải dữ liệu từ Google Sheets
+        async function fetchSheetData(gameName) {
+            const url = CSV_URLS[gameName];
+            if (!url || url.startsWith("THAY_LINK")) return false;
+            try {
+                const res = await fetch(url + '&t=' + new Date().getTime());
+                const csvText = await res.text();
+                gameData[gameName] = parseCSV(csvText);
+                return true;
+            } catch (err) {
+                console.error("Lỗi khi tải dữ liệu từ Google Sheet:", err);
+                return false;
+            }
+        }
+
+        // Biến trạng thái
         let selectedGameName = null;
         let pool = [];
         let totalCount = 0;
         let playedCount = 0;
 
-        // Stage 1: Chọn Game
         function selectGame(gameName, cardElement) {
             selectedGameName = gameName;
             document.querySelectorAll('.game-choice-card').forEach(card => card.classList.remove('selected'));
@@ -590,20 +573,31 @@
             document.getElementById('btn-start').removeAttribute('disabled');
         }
 
-        // Chuyển Stage
         function showStage(stageId) {
             document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
             document.getElementById(stageId).classList.add('active');
         }
 
-        // Bắt đầu game (Stage 1 -> Stage 2)
-        function startGame() {
+        async function startGame() {
             if (!selectedGameName) return;
+
+            const startBtn = document.getElementById('btn-start');
+            startBtn.innerText = "載入問題中...";
+            startBtn.disabled = true;
+
+            await fetchSheetData(selectedGameName);
             
+            startBtn.innerText = "開始遊戲";
+            startBtn.disabled = false;
+
             const list = gameData[selectedGameName];
+            if (!list || list.length === 0) {
+                alert("無法載入問題，請確認 Google Sheet 連結與權限是否正確。");
+                return;
+            }
+
             totalCount = list.length;
             playedCount = 0;
-            // Tạo mảng chỉ số ngẫu nhiên không lặp lại
             pool = Array.from({ length: totalCount }, (_, i) => i);
 
             document.getElementById('game-badge-name').innerText = selectedGameName;
@@ -611,10 +605,8 @@
             nextCard();
         }
 
-        // Bốc thẻ bài tiếp theo
         function nextCard() {
             if (pool.length === 0) {
-                // Đã hết bài -> Chuyển sang Tầng 3
                 showStage('stage-end');
                 return;
             }
@@ -625,28 +617,18 @@
 
             const currentItem = gameData[selectedGameName][cardIndex];
 
-            // Hiển thị câu hỏi
             document.getElementById('question-box').innerText = currentItem.Question;
 
-            // Xử lý Room tag (dành cho 5 Curated Rooms)
             const roomTag = document.getElementById('room-tag');
             if (currentItem.Room) {
-                roomTag.innerText = `🚪 ${currentItem.Room}`;
+                roomTag.innerText = `🎀 ${currentItem.Room}`;
                 roomTag.style.display = 'inline-block';
             } else {
                 roomTag.style.display = 'none';
             }
 
-            // Gán gợi ý & ẩn mặc định
-            document.getElementById('followup-text').innerText = currentItem['Gameplay / Follow-up'] || '';
-            document.getElementById('followup-box').classList.remove('show');
-
-            // Cập nhật tiến độ
+            document.getElementById('followup-text').innerText = currentItem['Gameplay / Follow-up'] || '無特別規則，自由分享。';
             document.getElementById('progress-text').innerText = `${playedCount} / ${totalCount}`;
-        }
-
-        function toggleHint() {
-            document.getElementById('followup-box').classList.toggle('show');
         }
 
         function confirmEndGame() {
@@ -655,7 +637,6 @@
             }
         }
 
-        // Tầng 3 -> Tầng 1 (Reset)
         function resetToHome() {
             selectedGameName = null;
             document.querySelectorAll('.game-choice-card').forEach(card => card.classList.remove('selected'));
